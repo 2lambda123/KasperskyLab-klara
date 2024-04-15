@@ -37,7 +37,8 @@ def yara_scan(scan_options):
         yara_rules = scan_options["rules"]
     if "fileset_scan" not in scan_options:
         logging.warning("Did not receive 'fileset_scan' from dispatcher!")
-        results["yara_errors"] = "Did not receive 'fileset_scan' from dispatcher!"
+        results[
+            "yara_errors"] = "Did not receive 'fileset_scan' from dispatcher!"
         return results
     else:
         fileset_scan = scan_options["fileset_scan"]
@@ -51,8 +52,7 @@ def yara_scan(scan_options):
     try:
         # Generate a temporary file name
         yara_rules_temp_file = tempfile.NamedTemporaryFile(
-            delete=False, prefix="yara_rules_", dir=config.yara_temp_dir
-        )
+            delete=False, prefix="yara_rules_", dir=config.yara_temp_dir)
         # Getting the 2 temp files' FN
         yara_rules_temp_file_fn = os.path.abspath(yara_rules_temp_file.name)
         # After we write the rules, we close the file so we prepare it for the
@@ -81,7 +81,8 @@ def yara_scan(scan_options):
 
     # Make sure the yara binary is executable
     if not os.path.isfile(config.yara_path):
-        results["yara_errors"] = "Yara binary missing from %s".format(config.yara_path)
+        results["yara_errors"] = "Yara binary missing from %s".format(
+            config.yara_path)
         # Close the files!
         null_file.close()
         # Deleting temp files
@@ -95,7 +96,9 @@ def yara_scan(scan_options):
     yara_args = shlex.split(yara_cmd + os.devnull)
     # Since we are scanning /dev/null we want to make sure that yara doesn't
     # complain about the rules.
-    yara_process = subprocess.Popen(yara_args, stdout=null_file, stderr=subprocess.PIPE)
+    yara_process = subprocess.Popen(yara_args,
+                                    stdout=null_file,
+                                    stderr=subprocess.PIPE)
     # Now we wait for yara to finish....
     (stdout_data, stderr_data) = yara_process.communicate()
     # stdout_data is ""
@@ -121,10 +124,12 @@ def yara_scan(scan_options):
     yara_args = shlex.split(yara_cmd + str(fileset_scan))
     time_start = int(time.time())
     # We redirect stderr to null
-    yara_process = subprocess.Popen(yara_args, stdout=subprocess.PIPE, stderr=null_file)
-    head_process = subprocess.Popen(
-        config.head_path_and_args, stdout=subprocess.PIPE, stdin=yara_process.stdout
-    )
+    yara_process = subprocess.Popen(yara_args,
+                                    stdout=subprocess.PIPE,
+                                    stderr=null_file)
+    head_process = subprocess.Popen(config.head_path_and_args,
+                                    stdout=subprocess.PIPE,
+                                    stdin=yara_process.stdout)
     # Allow yara_process to receive a SIGPIPE if head_process exits.
     yara_process.stdout.close()
     # Now we wait for yara to finish....
@@ -196,4 +201,5 @@ def generate_md5_from_results(yara_matched_files):
     )
     stdout_data = p.communicate()[0]
     # We want unique md5s
-    return json.dumps(list(set(re.findall(pattern_for_md5sum_results, stdout_data))))
+    return json.dumps(
+        list(set(re.findall(pattern_for_md5sum_results, stdout_data))))

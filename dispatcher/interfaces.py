@@ -22,7 +22,8 @@ class mysql:
 
         """
         # or the query returnes more than 1 row
-        q = self.db.query("SELECT id " + "FROM agents " + "WHERE auth = %s", auth)
+        q = self.db.query("SELECT id " + "FROM agents " + "WHERE auth = %s",
+                          auth)
         # If we didn't get exactly 1 answer, there is a problem
         if len(q) == 0:
             return None
@@ -36,9 +37,8 @@ class mysql:
     # in a json list
     def fetch_available_jobs(self):
         """ """
-        q = self.db.query(
-            "SELECT id, description " + "FROM jobs " + "WHERE `status` = 'new'"
-        )
+        q = self.db.query("SELECT id, description " + "FROM jobs " +
+                          "WHERE `status` = 'new'")
         our_answer = list()
         for entry in q:
             try:
@@ -46,12 +46,12 @@ class mysql:
                 if "fileset_scan" in entry_description:
                     # If fileset scan is indeed in our description, then we add
                     # this entry in our answer
-                    our_answer.append(
-                        {
-                            "id": entry["id"],
-                            "fileset_scan": entry_description["fileset_scan"],
-                        }
-                    )
+                    our_answer.append({
+                        "id":
+                        entry["id"],
+                        "fileset_scan":
+                        entry_description["fileset_scan"],
+                    })
             except Exception:
                 continue
         return json.dumps(our_answer)
@@ -207,8 +207,8 @@ class mysql:
                 )
             except Exception as e:
                 logging.error(
-                    "General failure when trying to insert the job in db: %s", e
-                )
+                    "General failure when trying to insert the job in db: %s",
+                    e)
 
         else:
             # If the current job doesn't exist any more, we just pass,
@@ -221,6 +221,7 @@ class mysql:
 
 class notification:
     """ """
+
     # def __init__(self):
 
     def email(self, data):
@@ -238,9 +239,8 @@ class notification:
         if len(data["to"]) > 0 and config.notification_email_enabled:
             try:
                 smtp = smtplib.SMTP(config.notification_email_smtp_srv)
-                smtp.sendmail(
-                    config.notification_email_from, data["to"], mail.as_string()
-                )
+                smtp.sendmail(config.notification_email_from, data["to"],
+                              mail.as_string())
                 smtp.quit()
                 return True
             # We are catching all exceptions, since we are running in daemon
