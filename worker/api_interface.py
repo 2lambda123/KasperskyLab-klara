@@ -17,7 +17,7 @@ def fetch_available_jobs():
     # Make the request, with the auth as POST DATA
     try:
         r = requests.post(config.api_location + "/worker_fetch_available_jobs",
-                          data=payload)
+                          data=payload, timeout=60)
         return r.json()
     # We want to catch any exception related to:
     # Not being able to connect (Requests exception) or json decodification
@@ -41,7 +41,7 @@ def request_assign_job(job_id=-1):
     # Make the request, with the auth as POST DATA
     try:
         r = requests.post(config.api_location + "/worker_assign_job",
-                          data=payload)
+                          data=payload, timeout=60)
         return r.json()
     # We want to catch any exception related to:
     # Not being able to connect (Requests exception) or json decodification
@@ -68,7 +68,7 @@ def push_results(results):
     # Make the request, with the auth as POST DATA
     try:
         r = requests.post(config.api_location + "/worker_save_results",
-                          data=payload)
+                          data=payload, timeout=60)
         return r.status_code
     except Exception as e:
         logging.error("Exception: %s", e)
