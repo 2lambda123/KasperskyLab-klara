@@ -1,12 +1,13 @@
-import config
+import json
 import logging
-import tempfile
-import shlex
-import subprocess
-import time
 import os
 import re
-import json
+import shlex
+import subprocess
+import tempfile
+import time
+
+import config
 
 # Functions used by the Klara client
 

@@ -1,8 +1,9 @@
-import logging
-import config
-import smtplib
 import json
+import logging
+import smtplib
 from email.mime.text import MIMEText
+
+import config
 
 
 class mysql:

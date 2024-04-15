@@ -1,7 +1,8 @@
+import json
 import logging
+
 import config
 import requests
-import json
 
 # Ask dispatcher to send the current available jobs
 # Will return an API response (status, status_msg, return_data (if status == ok)) already
