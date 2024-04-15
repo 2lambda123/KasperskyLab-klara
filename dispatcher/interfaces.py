@@ -18,7 +18,7 @@ class mysql:
     def authorize_agent(self, auth):
         """
 
-        :param auth: 
+        :param auth:
 
         """
         # or the query returnes more than 1 row
@@ -61,8 +61,8 @@ class mysql:
     def assign_new_job(self, agent_id, job_id):
         """
 
-        :param agent_id: 
-        :param job_id: 
+        :param agent_id:
+        :param job_id:
 
         """
 
@@ -111,7 +111,7 @@ class mysql:
     def job_get_details(self, job_id):
         """
 
-        :param job_id: 
+        :param job_id:
 
         """
         assert isinstance(job_id, int)
@@ -140,9 +140,9 @@ class mysql:
     def save_agent_results(self, agent_id, results, job_status):
         """
 
-        :param agent_id: 
-        :param results: 
-        :param job_status: 
+        :param agent_id:
+        :param results:
+        :param job_status:
 
         """
         validators.validate_agent_results(results)
@@ -226,7 +226,7 @@ class notification:
     def email(self, data):
         """
 
-        :param data: 
+        :param data:
 
         """
         assert isinstance(data, dict)
@@ -256,7 +256,7 @@ class validators:
     def validate_agent_results(cls, entry):
         """
 
-        :param entry: 
+        :param entry:
 
         """
         assert isinstance(entry, dict)

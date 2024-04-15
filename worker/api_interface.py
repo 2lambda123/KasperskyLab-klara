@@ -55,7 +55,7 @@ def request_assign_job(job_id=-1):
 def push_results(results):
     """
 
-    :param results: 
+    :param results:
 
     """
     # logging.info ("Called push_results")

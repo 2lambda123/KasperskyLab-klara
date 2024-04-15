@@ -245,7 +245,7 @@ pip install -r ~/klara-github-repo/install/requirements.txt
 
 Now fill in the settings in config.py:
 
-**Note**: use the API key you just inserted in table `agents` above;  
+**Note**: use the API key you just inserted in table `agents` above;
 **Note**: Check [Worker Settings](#setting-up-workers-scan-repositories-and-virus-collection) to understand how to change settings
 `virus_collection` and `virus_collection_control_file`
 
