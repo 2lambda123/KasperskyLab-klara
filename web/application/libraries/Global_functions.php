@@ -1,10 +1,14 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
+<?php
 
-class Global_functions 
+if (! defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
+
+class Global_functions
 {
     public function __construct()
     {
-        $this->CI               =& get_instance();
+        $this->CI               = & get_instance();
         $this->web_app_version  = trim(file_get_contents(FCPATH."version.txt"));
         // Separator for scan_filesets
         $this->scan_filesets_separator  = " + ";
@@ -19,7 +23,7 @@ class Global_functions
     // It doesn't break the behaviour of existing AJAX requests
     public function api_generate_response_json($status = '', $status_msg = '', $return_data = null)
     {
-        return json_encode ($this->api_generate_response($status, $status_msg, $return_data));
+        return json_encode($this->api_generate_response($status, $status_msg, $return_data));
     }
     // Same as above, but generates an error
     public function api_generate_error_json($error = '')
@@ -36,29 +40,32 @@ class Global_functions
             "status_msg" => $status_msg,
         );
         // If return_data is not null we include in our return
-        if (!is_null($return_data))
+        if (!is_null($return_data)) {
             $result['return_data'] = $return_data;
+        }
 
         return $result;
     }
     // Function used to split a string into tokens if they are delimited by
     // \s (<=> " ",  \r, \t, \n and \f), comma, or a new line
-    public function multientries_split ($entries = '')
+    public function multientries_split($entries = '')
     {
-        return preg_split("/[\s,\n]+/",$entries, -1, PREG_SPLIT_NO_EMPTY);
+        return preg_split("/[\s,\n]+/", $entries, -1, PREG_SPLIT_NO_EMPTY);
     }
     // Function used to trim a given string if it is longer than default 64 chars
     public function string_trim($string, $chars_limit = 64)
     {
-        if (strlen($string) < $chars_limit)
+        if (strlen($string) < $chars_limit) {
             return $string;
+        }
         return substr($string, 0, $chars_limit)."[..]";
     }
     public function current_user_owns_job($job_owner_id = '')
     {
         // If user is admin, he owns the job
-        if ($this->CI->klsecurity->user_is_admin())
+        if ($this->CI->klsecurity->user_is_admin()) {
             return true;
+        }
         // Else his user_id needs to be the same as job's owner id
         return strcmp($job_owner_id, $this->CI->klsecurity->get_auth_userid()) == 0 ? true : false;
     }
@@ -66,12 +73,13 @@ class Global_functions
     // Returns true if email is valid and update successful, or false otherwise
     public function update_email_current_user($email = '')
     {
-        if (!valid_email($email))
+        if (!valid_email($email)) {
             return false;
+        }
 
         $notify_email_array = array('notify_email' => $email);
         $id_array           = array('cnt' => $this->CI->klsecurity->get_auth_userid());
-        $this->CI->db->update ('users', $notify_email_array, $id_array);
+        $this->CI->db->update('users', $notify_email_array, $id_array);
         return true;
     }
     // user_id argument for this function might be null - in this case we fetch
@@ -79,17 +87,17 @@ class Global_functions
     public function get_user_email($user_id = null)
     {
         // If user_id is null, let's fetch the current user_id
-        if (is_null($user_id))
+        if (is_null($user_id)) {
             $user_id = $this->CI->klsecurity->get_auth_userid();
+        }
         // Else the caller will give us the user_id
         // Try to get the email
         $this->CI->db->select('notify_email');
         $this->CI->db->where('cnt', "".$user_id);
         $q = $this->CI->db->get('users');
 
-        if ($q->num_rows() != 1)
-        {
-            $this->CI->klsecurity->log('warn','global_functions/get_user_email','User requested e-mail for invalid user id: '.print_r ($user_id, true));
+        if ($q->num_rows() != 1) {
+            $this->CI->klsecurity->log('warn', 'global_functions/get_user_email', 'User requested e-mail for invalid user id: '.print_r($user_id, true));
             return "";
         }
 
@@ -104,17 +112,17 @@ class Global_functions
     public function get_user_group_cnt($user_id = null)
     {
         // If user_id is null, let's fetch the current user_id
-        if (is_null($user_id))
+        if (is_null($user_id)) {
             $user_id = $this->CI->klsecurity->get_auth_userid();
+        }
         // Else the caller will give us the user_id
         // Try to get the group cnt
         $this->CI->db->select('group_cnt');
         $this->CI->db->where('cnt', "".$user_id);
         $q = $this->CI->db->get('users');
 
-        if ($q->num_rows() != 1)
-        {
-            $this->CI->klsecurity->log('warn','global_functions/get_user_group_cnt','User requested group for invalid user id: '.print_r ($user_id, true));
+        if ($q->num_rows() != 1) {
+            $this->CI->klsecurity->log('warn', 'global_functions/get_user_group_cnt', 'User requested group for invalid user id: '.print_r($user_id, true));
             return -1;
         }
 
@@ -128,7 +136,7 @@ class Global_functions
     public function get_user_group_name($user_id = null)
     {
         // We pass the argument directly to get_user_group_cnt
-        $user_group_id = $this->get_user_group_cnt ($user_id);
+        $user_group_id = $this->get_user_group_cnt($user_id);
 
         // Else the caller will give us the user_id
         // Try to get the group cnt
@@ -136,9 +144,8 @@ class Global_functions
         $this->CI->db->where('cnt', "".$user_group_id);
         $q = $this->CI->db->get('users_groups');
 
-        if ($q->num_rows() != 1)
-        {
-            $this->CI->klsecurity->log('warn','global_functions/get_user_group_name','User requested invalid group cnt: '.print_r ($user_id, true));
+        if ($q->num_rows() != 1) {
+            $this->CI->klsecurity->log('warn', 'global_functions/get_user_group_name', 'User requested invalid group cnt: '.print_r($user_id, true));
             return -1;
         }
 
@@ -152,15 +159,14 @@ class Global_functions
     public function get_user_allowed_repositories($user_id = null)
     {
         // We pass the argument directly to get_user_group_cnt
-        $user_group_id = $this->get_user_group_cnt ($user_id);
+        $user_group_id = $this->get_user_group_cnt($user_id);
         // From this group id, extract the allower scan_filesets_list
         $this->CI->db->select('scan_filesets_list');
         $this->CI->db->where('cnt', "".$user_group_id);
         $q = $this->CI->db->get('users_groups');
 
-        if ($q->num_rows() != 1)
-        {
-            $this->CI->klsecurity->log('warn','global_functions/get_user_allowed_repositories','User group doesn\'t exist: '.print_r ($user_group_id, true));
+        if ($q->num_rows() != 1) {
+            $this->CI->klsecurity->log('warn', 'global_functions/get_user_allowed_repositories', 'User group doesn\'t exist: '.print_r($user_group_id, true));
             return array();
         }
         // We now have an aswer
@@ -168,9 +174,8 @@ class Global_functions
         $entry = $q->result_array();
         $scan_filesets_json     = $entry[0]['scan_filesets_list'];
         $scan_filesets_array    = json_decode($scan_filesets_json);
-        if (is_null($scan_filesets_array))
-        {
-            $this->CI->klsecurity->log('warn','global_functions/get_user_allowed_repositories','scan_fileset_list JSON invalid: '.print_r ($scan_filesets_json, true));
+        if (is_null($scan_filesets_array)) {
+            $this->CI->klsecurity->log('warn', 'global_functions/get_user_allowed_repositories', 'scan_fileset_list JSON invalid: '.print_r($scan_filesets_json, true));
             return array();
         }
         return $scan_filesets_array;
@@ -182,36 +187,35 @@ class Global_functions
     public function get_user_group_jailed($user_id = null)
     {
         // We pass the argument directly to get_user_group_cnt
-        $user_group_id = $this->get_user_group_cnt ($user_id);
+        $user_group_id = $this->get_user_group_cnt($user_id);
         // Else the caller will give us the user_id
         // Try to get the group cnt
         $this->CI->db->select('jail_users');
         $this->CI->db->where('cnt', "".$user_group_id);
         $q = $this->CI->db->get('users_groups');
 
-        if ($q->num_rows() != 1)
-        {
-            $this->CI->klsecurity->log('warn','global_functions/get_user_group_jailed','User requested invalid group cnt: '.print_r ($user_id, true));
+        if ($q->num_rows() != 1) {
+            $this->CI->klsecurity->log('warn', 'global_functions/get_user_group_jailed', 'User requested invalid group cnt: '.print_r($user_id, true));
             return true;
         }
 
         // We have 1 result. Let's check it
         $entry = $q->result_array();
         // By default we consider all users as being jailed, unless stated by group policy!
-        if ($entry[0]['jail_users'] === '0')
+        if ($entry[0]['jail_users'] === '0') {
             return false;
+        }
         return true;
     }
     public function get_user_allowed_repositories_details($user_id = null)
     {
-        $allowed_repositories = $this->get_user_allowed_repositories ($user_id);
+        $allowed_repositories = $this->get_user_allowed_repositories($user_id);
 
         // Initially don't allow any repositories to be presented to user
-        $this->CI->db->where('1 = 2', null, FALSE);
+        $this->CI->db->where('1 = 2', null, false);
         // From DB repositories, filter the ones allowed for user
-        foreach ($allowed_repositories as $repo_id)
-        {
-            $this->CI->db->or_where ('id', $repo_id);
+        foreach ($allowed_repositories as $repo_id) {
+            $this->CI->db->or_where('id', $repo_id);
         }
         $this->CI->db->order_by('entry', 'asc');
         // Let's fetch the results!
@@ -222,82 +226,86 @@ class Global_functions
     /******* Jobs Functions *******/
     // This function is being called multiple times in this controller
     // It needs to be followed by DB select statements
-    public function jobs_apply_db_restrictions ()
+    public function jobs_apply_db_restrictions()
     {
         // Admins can see all jobs
-        if (!$this->CI->klsecurity->user_is_admin())
-        {
-            $auth_user_id   = $this->CI->klsecurity->get_auth_userid ();
-            $user_is_jailed = $this->CI->global_functions->get_user_group_jailed ();
-            $auth_group_id  = $this->CI->global_functions->get_user_group_cnt ();
+        if (!$this->CI->klsecurity->user_is_admin()) {
+            $auth_user_id   = $this->CI->klsecurity->get_auth_userid();
+            $user_is_jailed = $this->CI->global_functions->get_user_group_jailed();
+            $auth_group_id  = $this->CI->global_functions->get_user_group_cnt();
 
             // If user is jailed, we only allow seeing his own jobs
-            if ($user_is_jailed)
+            if ($user_is_jailed) {
                 $this->CI->db->where('owner_id', "" . $auth_user_id);
-            else
+            } else {
                 // User is not jailed! We limit the query to just jobs from his current group!
                 $this->CI->db->where('owner_group_id', "" . $auth_group_id);
+            }
         }
         return;
     }
-    public function jobs_add ($yara_rules, $yara_fileset_scan, $return_jobs_ids = false)
+    public function jobs_add($yara_rules, $yara_fileset_scan, $return_jobs_ids = false)
     {
         // Let's do various checks
-        if (!is_bool($return_jobs_ids))
+        if (!is_bool($return_jobs_ids)) {
             $return_ids = false;
-        if ($yara_rules === NULL || $yara_fileset_scan === NULL)
+        }
+        if ($yara_rules === null || $yara_fileset_scan === null) {
             return $this->api_generate_error_json("Please input yara rules and repositories to scan");
+        }
 
         // Check if the user submitted a rule
-        if (!is_string($yara_rules) || strlen($yara_rules) <= 0)
+        if (!is_string($yara_rules) || strlen($yara_rules) <= 0) {
             return $this->api_generate_error_json("Please submit a valid Yara rule");
+        }
 
         // Check if submitted yara rules contain non-ASCII chars
-        if (!mb_check_encoding ($yara_rules, 'ASCII'))
-        {
+        if (!mb_check_encoding($yara_rules, 'ASCII')) {
             // Rule has non-ASCII chars in it! Trying to identify the location
             // Go till you find at most 30 ASCII chars, before the non-ASCII char, capture the 30 chars
-            $match_before_count = preg_match('/^.*?([\x00-\x7F]{0,30})[^\x00-\x7F]/si',     $yara_rules, $match_before);
-            $match_after_count  = preg_match('/^.*?[^\x00-\x7F]+([\x00-\x7F]{0,30})/si',    $yara_rules, $match_after);
-            if ($match_before_count == 1 && $match_after_count == 1)
-            {
+            $match_before_count = preg_match('/^.*?([\x00-\x7F]{0,30})[^\x00-\x7F]/si', $yara_rules, $match_before);
+            $match_after_count  = preg_match('/^.*?[^\x00-\x7F]+([\x00-\x7F]{0,30})/si', $yara_rules, $match_after);
+            if ($match_before_count == 1 && $match_after_count == 1) {
                 $message_before = $this->CI->security->xss_clean($match_before[1]);
-                if ($message_before === "")
+                if ($message_before === "") {
                     $message_before = "[Beginning of Yara rule]";
+                }
                 $message_after  = $this->CI->security->xss_clean($match_after[1]);
-                if ($message_after === "")
+                if ($message_after === "") {
                     $message_after = "[End of Yara rule]";
+                }
                 // Adding PRE field, as well as filtering for xss
                 // Check if API call and return a different msg
-                if ($this->CI->klsecurity->api_request())
+                if ($this->CI->klsecurity->api_request()) {
                     $non_ascii_message =    "Rule contains non-ASCII characters between '" . $message_before .
                                             "' AND '" . $message_after . "'";
-                else
+                } else {
                     $non_ascii_message =    "Rule contains non-ASCII characters between <pre>".
                                         $message_before . "</pre> AND <pre>".
                                         $message_after . "</pre>";
+                }
                 return $this->api_generate_error_json($non_ascii_message);
-            }
-            else
+            } else {
                 return $this->api_generate_error_json("Rule contains non-ASCII characters. Please retry");
+            }
         }
 
-        if (!is_array($yara_fileset_scan))
+        if (!is_array($yara_fileset_scan)) {
             return $this->api_generate_error_json("Invalid fileset scan");
+        }
 
         // We want all entries to be strings!
-        foreach ($yara_fileset_scan as $repo_id)
-        {
+        foreach ($yara_fileset_scan as $repo_id) {
             // Each entry needs to be an int
-            if (!is_string($repo_id))
-            {
-                $this->CI->klsecurity->log('warn', 'jobs/add_job','Invalid repo ID received: '.print_r($repo_id, true));
+            if (!is_string($repo_id)) {
+                $this->CI->klsecurity->log('warn', 'jobs/add_job', 'Invalid repo ID received: '.print_r($repo_id, true));
                 return $this->api_generate_error_json("Invalid fileset scan");
             }
         }
         $user_notify_email      = $this->get_user_email();
-        if (!valid_email($user_notify_email))
+        if (!valid_email($user_notify_email)) {
             return $this->api_generate_error_json("Your e-mail is invalid, please update your profile!");
+        }
 
         // E-mail seems to be fine!
         $allowed_repositories   = $this->get_user_allowed_repositories();
@@ -306,9 +314,8 @@ class Global_functions
         // First of all, convert the "special" entries into normal values
         // We know that our post variable is an array containing ONLY strings with length < 10;
         // Convert our special repositories into normal ids
-        foreach ($yara_fileset_scan as $repo)
-        {
-                $final_repositories[] = $repo;
+        foreach ($yara_fileset_scan as $repo) {
+            $final_repositories[] = $repo;
         }
         // Uniquify the list
         $final_repositories     = array_unique($final_repositories, SORT_STRING);
@@ -319,9 +326,8 @@ class Global_functions
 
         // If there is no data in $final_repositories then user asked to scan some unauthorized repos
         // log this action and return "error"
-        if (count ($final_repositories) < 1)
-        {
-            $this->CI->klsecurity->log('warn', 'jobs/add_job','User tried to scan unauthorized repos: '.print_r($final_repositories, true));
+        if (count($final_repositories) < 1) {
+            $this->CI->klsecurity->log('warn', 'jobs/add_job', 'User tried to scan unauthorized repos: '.print_r($final_repositories, true));
             return $this->api_generate_error_json("unautorized_repos");
         }
 
@@ -329,40 +335,38 @@ class Global_functions
         // NOTICE: some repositories might contain multiple scan_paths separated by ;
         // Decided to decrease the quota by the number of scan_paths IDs requested,
         // and not by the real, effective scan_paths (or how many yara scans will be made)
-        $total_requested_scan_paths = count ($final_repositories);
-        if (!$this->CI->search_quota->user_can_query ($total_requested_scan_paths))
-        {
+        $total_requested_scan_paths = count($final_repositories);
+        if (!$this->CI->search_quota->user_can_query($total_requested_scan_paths)) {
             $quota_msg = "Quota error! Your current quota stops you from adding ". $total_requested_scan_paths . " job(s)";
-            return $this->api_generate_error_json ($quota_msg);
+            return $this->api_generate_error_json($quota_msg);
         }
 
         $jobs_ids = array();
         // If each entry in $final_repositories is in our DB, find its path
-        foreach ($final_repositories as $repo_id)
-        {
+        foreach ($final_repositories as $repo_id) {
             // We have checked that:
             // 1) the yara repo is in our DB
             // 2) the user is allowed to scan this fileset
             $q = $this->CI->db->get_where('scan_filesets', array("id" => "".$repo_id));
-            if ($q->num_rows() == 1)
-            {
+            if ($q->num_rows() == 1) {
                 $ans = $q->result_array();
                 // We only have 1 result
                 $initial_repo_scan_fileset = $ans[0]['entry'];
-                $returned_ids = $this->jobs_add_db ($initial_repo_scan_fileset, $user_notify_email, $yara_rules);
+                $returned_ids = $this->jobs_add_db($initial_repo_scan_fileset, $user_notify_email, $yara_rules);
                 // Add to our array the IDs
                 $jobs_ids = array_merge($jobs_ids, $returned_ids);
+            } else {
+                $this->CI->klsecurity->log('warn', 'jobs/add_job', 'Unknown repo ID received: '. print_r($repo_id, true));
             }
-            else
-                $this->CI->klsecurity->log('warn', 'jobs/add_job','Unknown repo ID received: '. print_r($repo_id, true));
         }
 
         // Let's decrease the quota
         $this->CI->search_quota->user_decrease_quota($total_requested_scan_paths);
         // Everything went fine.
         // Sometimes we also want to inserted IDs
-        if ($return_jobs_ids)
-            return $this->api_generate_response_json("ok",'', $jobs_ids);
+        if ($return_jobs_ids) {
+            return $this->api_generate_response_json("ok", '', $jobs_ids);
+        }
         return $this->api_generate_response_json("ok");
     }
     // This function receives a scan_path, notify_email and yara_rules
@@ -370,36 +374,35 @@ class Global_functions
     // It also decreases the quota
     // WARNING: function assumes all the arguments have been sanitized / validated properly
     // WARNING: no checkes are being made!
-    public function jobs_add_db ($initial_repo_scan_fileset, $user_notify_email, $yara_rules)
+    public function jobs_add_db($initial_repo_scan_fileset, $user_notify_email, $yara_rules)
     {
         $jobs_ids = array();
         // Some entries in 'scan_filesets' table are added by the operator using multiple scan
         // paths. Eg: '/test + /virus + /_clean'. We need to separate them here.
         // Multiple repositories separated by $this->scan_filesets_separator can exist under
         // the same repository ID
-        $all_scan_filesets = explode ($this->scan_filesets_separator, $initial_repo_scan_fileset);
-        foreach ($all_scan_filesets as $repository_scan_path)
-        {
-           // Fire the job!
-           $job_description = array();
-           $job_description['fileset_scan']    = $repository_scan_path;
-           $job_description['notify_email']    = $user_notify_email;
+        $all_scan_filesets = explode($this->scan_filesets_separator, $initial_repo_scan_fileset);
+        foreach ($all_scan_filesets as $repository_scan_path) {
+            // Fire the job!
+            $job_description = array();
+            $job_description['fileset_scan']    = $repository_scan_path;
+            $job_description['notify_email']    = $user_notify_email;
 
-           $db_insert = array();
-           $job_owner_id                = $this->CI->klsecurity->get_auth_userid();
-           $db_insert['description']    = json_encode($job_description);
-           $db_insert['results']        = "";
-           $db_insert['rules']          = $yara_rules;
-           $db_insert['status']         = "new";
-           $db_insert['agent_id']       = "-1";
-           $db_insert['owner_id']       = $job_owner_id;
-           $db_insert['owner_group_id'] = $this->get_user_group_cnt ();
-           $db_insert['finish_time']    = "N/A";
-           // Setting up the shared key
-           // It will be composed of sha256(md5($yara_rules) + md5(owner_id) + random)
-           $db_insert['share_key']      = hash('sha256', md5($yara_rules) . md5($job_owner_id) . sha1(rand()));
-           $this->CI->db->insert('jobs', $db_insert);
-           array_push($jobs_ids, $this->CI->db->insert_id());
+            $db_insert = array();
+            $job_owner_id                = $this->CI->klsecurity->get_auth_userid();
+            $db_insert['description']    = json_encode($job_description);
+            $db_insert['results']        = "";
+            $db_insert['rules']          = $yara_rules;
+            $db_insert['status']         = "new";
+            $db_insert['agent_id']       = "-1";
+            $db_insert['owner_id']       = $job_owner_id;
+            $db_insert['owner_group_id'] = $this->get_user_group_cnt();
+            $db_insert['finish_time']    = "N/A";
+            // Setting up the shared key
+            // It will be composed of sha256(md5($yara_rules) + md5(owner_id) + random)
+            $db_insert['share_key']      = hash('sha256', md5($yara_rules) . md5($job_owner_id) . sha1(rand()));
+            $this->CI->db->insert('jobs', $db_insert);
+            array_push($jobs_ids, $this->CI->db->insert_id());
         }
         // Everything went OK!
         return $jobs_ids;
@@ -407,7 +410,7 @@ class Global_functions
     // Function used to display job details for a specific ID
     // IF the job ID doesn't exit then check if a share key was specified
     // If there are no results, returns an empty array
-    public function jobs_view ($id = -1, $share_key = null)
+    public function jobs_view($id = -1, $share_key = null)
     {
         // First of all, let's escape the input!
         $id         = intval($this->CI->security->xss_clean($id));
@@ -415,12 +418,13 @@ class Global_functions
 
         // Make sure the share key is a valid sha256
         // preg_match can return 0, 1 or FALSE so we convert it to boolean first
-        if ((bool) preg_match('/^[0-9a-f]{64}$/i', $share_key) == FALSE)
+        if ((bool) preg_match('/^[0-9a-f]{64}$/i', $share_key) == false) {
             $share_key = null;
+        }
 
         // Apply admin / non-admin restrictions for jobs
         // As well as jail / non-jail restrictions
-        $this->CI->global_functions->jobs_apply_db_restrictions ();
+        $this->CI->global_functions->jobs_apply_db_restrictions();
         // Get the job from the DB, as well as owner username
         // We don't want to fetcha any other parts from users table (especially api key)
         $this->CI->db->select('jobs.*, username');
@@ -428,14 +432,12 @@ class Global_functions
         $this->CI->db->where('id', "". $id);
         $this->CI->db->limit(1);
         $q = $this->CI->db->get('jobs');
-        if ($q->num_rows() == 0)
-        {
+        if ($q->num_rows() == 0) {
             // If we got 0 results, we give a last chance to the user,
             // maybe he supplied a valid share_key
-            if (is_null($share_key))
-            {
+            if (is_null($share_key)) {
                 // No chances - invalid key!
-                $this->CI->klsecurity->log('warn', 'jobs/view','User requested invalid job or not owned by him: '.print_r($id, true));
+                $this->CI->klsecurity->log('warn', 'jobs/view', 'User requested invalid job or not owned by him: '.print_r($id, true));
                 return array();
             }
             // Potential valid share_key.. let's check it!
@@ -451,10 +453,9 @@ class Global_functions
             $this->CI->db->limit(1);
             $q = $this->CI->db->get('jobs');
             // Final check to see if we have any results
-            if ($q->num_rows() == 0)
-            {
+            if ($q->num_rows() == 0) {
                 // Wrong share key!
-                $this->CI->klsecurity->log('warn', 'jobs/view','User requested invalid job or not owned by him. ID => '.print_r($id, true). " - invalid key => ". print_r($share_key, true));
+                $this->CI->klsecurity->log('warn', 'jobs/view', 'User requested invalid job or not owned by him. ID => '.print_r($id, true). " - invalid key => ". print_r($share_key, true));
                 return array();
             }
             // We have 1 results! Share key seems ok!
@@ -470,30 +471,29 @@ class Global_functions
         return $job;
     }
     // Function used to delete the specific job ID from DB
-    public function jobs_delete ($id = -1)
+    public function jobs_delete($id = -1)
     {
         // First of all, let's escape the input!
         $id = intval($id);
 
         // Admins can delete all jobs
         // Else only owner ID can delete a job
-        if (!$this->CI->klsecurity->user_is_admin())
+        if (!$this->CI->klsecurity->user_is_admin()) {
             $this->CI->db->where('owner_id', "".$this->CI->klsecurity->get_auth_userid());
+        }
 
         // Get the job from the DB!
         $this->CI->db->where('id', "".$id);
         $q = $this->CI->db->get('jobs');
         // There should be only one result
-        if ($q->num_rows() != 1)
-        {
-            $this->CI->klsecurity->log('warn', 'global_functions/jobs_delete','User attempted to delete invalid job or not owned by him: '.print_r($id, true));
+        if ($q->num_rows() != 1) {
+            $this->CI->klsecurity->log('warn', 'global_functions/jobs_delete', 'User attempted to delete invalid job or not owned by him: '.print_r($id, true));
             return $this->api_generate_error_json("job_invalid_id");
         }
         $job = $q->result_array();
         $job = $job['0'];
 
-        if ($job['status'] === "assigned")
-        {
+        if ($job['status'] === "assigned") {
             return $this->api_generate_error_json("job_assigned");
         }
         $this->CI->klsecurity->log('info', 'global_functions/jobs_delete', 'User deleted job id: '.print_r($id, true));
@@ -503,27 +503,28 @@ class Global_functions
     }
     // Function used to extract the first line of rules set from the rules
     // If limit_rule_name is set to true, display just first 64 chars
-    public function jobs_extract_first_rules ($rules = '', $limit_rule_name = false)
+    public function jobs_extract_first_rules($rules = '', $limit_rule_name = false)
     {
-        if (strcmp($rules, '') == 0)
+        if (strcmp($rules, '') == 0) {
             return "N/A";
+        }
 
         // Go until you find the first match with "rule" text in it
         $match_nr = preg_match("/^.*?rule (.*?)[\n{]/is", $rules, $matches);
-        if ($match_nr === 1)
-        {
+        if ($match_nr === 1) {
             // We have a match! Let's stop now
-            if (strlen($matches[1]) > $this->rule_name_start_trimm && $limit_rule_name)
+            if (strlen($matches[1]) > $this->rule_name_start_trimm && $limit_rule_name) {
                 return substr(trim($matches[1]), $this->rule_name_start_trimm)." [ ...]";
+            }
             return trim($matches[1]);
-        }
-        else if (is_bool($match_nr))
+        } elseif (is_bool($match_nr)) {
             return "Error while preg_match'ing!";
+        }
 
         // else we have 0 matches and we return "N/A"
         return "N/A";
     }
-    public function valid_md5 ($md5 ='')
+    public function valid_md5($md5 = '')
     {
         return strlen($md5) == 32 && ctype_xdigit($md5);
     }

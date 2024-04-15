@@ -1,4 +1,8 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
+<?php
+
+if (! defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
 
 class Klsecurity extends CI_Model
 {
@@ -51,24 +55,21 @@ class Klsecurity extends CI_Model
         $user_carry_on = false;
         // Here we want to check if the current user has permissions to invoke the controller
         // Let's check if we find the controller in the list.
-        if (array_key_exists($controller_full_path, $this->controller_perms))
-        {
+        if (array_key_exists($controller_full_path, $this->controller_perms)) {
             $this_controller_restriction = $this->controller_perms[$controller_full_path];
             $this->authorized_for_level($this_controller_restriction);
             // If we got there, then every-thing's fine!
             $user_carry_on = true;
         }
         // If the full path is not in the list of controllers, maybe it's an API endpoint
-        else if (in_array($controller_full_path, $this->api_controllers, true))
-        {
+        elseif (in_array($controller_full_path, $this->api_controllers, true)) {
             // Indeed is an API request!
 
             // Authenticate the user
             // Check if the auth_code exists!
             $auth_code = $this->input->post('auth_code');
-            if (is_null($auth_code))
-            {
-                $this->log('warn', 'klsecurity','[API] No auth_code POST variable received');
+            if (is_null($auth_code)) {
+                $this->log('warn', 'klsecurity', '[API] No auth_code POST variable received');
                 echo $this->global_functions->api_generate_error_json("not_authorized");
                 $this->api_finish_request();
             }
@@ -80,8 +81,7 @@ class Klsecurity extends CI_Model
             $this->db->limit(1);
             $res = $this->db->get('users');
 
-            if ($res->num_rows() == 1)
-            {
+            if ($res->num_rows() == 1) {
                 $row = $res->result_array();
                 $row = $row[0];
                 // Valid API request!
@@ -90,13 +90,12 @@ class Klsecurity extends CI_Model
                 // Check its permissions
                 $allowed_methods = json_decode($row['api_perms']);
                 if (in_array($requested_method, $allowed_methods, true) ||
-                    in_array("all",             $allowed_methods))
-                {
+                    in_array("all", $allowed_methods)) {
                     // CI tries to set up the session data. We don't need to show it to API end-points
                     header_remove("Set-Cookie");
                     // Client is allowed to request this method!
                     // Let's set up his session
-                    $data = array (
+                    $data = array(
                             // We only have user_id so we don't break the existing function calls
                             // We have a static user in the `users` table special for API
                             'username'      => $row['username'],
@@ -113,25 +112,21 @@ class Klsecurity extends CI_Model
                     // We don't need to show it to API end-points, again
                     header_remove("Set-Cookie");
                     $user_carry_on = true;
-                }
-                else
-                {
-                    $this->log('warn', 'klsecurity','[API] User '.$row['cnt'].' tried to access unauthorized method '.$requested_method);
+                } else {
+                    $this->log('warn', 'klsecurity', '[API] User '.$row['cnt'].' tried to access unauthorized method '.$requested_method);
                     echo $this->global_functions->api_generate_error_json("not_authorized");
                     $this->api_finish_request();
                 }
             }
             // If we got 0 results, then we generate an error
-            else
-            {
-                $this->log('warn', 'klsecurity','[API] auth_code not found in DB: ['.$auth_code."]");
+            else {
+                $this->log('warn', 'klsecurity', '[API] auth_code not found in DB: ['.$auth_code."]");
                 echo $this->global_functions->api_generate_error_json("not_authorized");
                 $this->api_finish_request();
             }
         }
         // Valid controller is not in list of controllers, nor an API endpoint.
-        else
-        {
+        else {
             $this->log('error', 'klsecurity', "User requested valid controller $controller_full_path but no ACL for it");
             // Valid controller is missing ACL restrictions. We invalidate the session
             $user_carry_on = false;
@@ -139,8 +134,9 @@ class Klsecurity extends CI_Model
         }
 
         // Ultimate safety check
-        if (!$user_carry_on)
+        if (!$user_carry_on) {
             $this->redirect_destroy_session();
+        }
         // User is allowed to view this page. Carry on!
     }
     public function get_curr_controller_full_path()
@@ -159,26 +155,24 @@ class Klsecurity extends CI_Model
     // if the session variable doesn't exist
     public function get_auth_username()
     {
-        if (is_null($this->session->userdata('username')))
-        {
-            $this->log('error','klsecurity/get_auth_username','Tried to fetch username, but was not assigned in session');
+        if (is_null($this->session->userdata('username'))) {
+            $this->log('error', 'klsecurity/get_auth_username', 'Tried to fetch username, but was not assigned in session');
             $this->redirect_destroy_session();
-        }
-        else
+        } else {
             return $this->session->userdata('username');
+        }
     }
     // Function returns auth user ID
-    // It assumes that the caller is expecting an user ID so will fail 
+    // It assumes that the caller is expecting an user ID so will fail
     // If the session variable doesn't exist
     public function get_auth_userid()
     {
-        if (is_null($this->session->userdata('user_id')))
-        {
-            $this->log('error','klsecurity/get_auth_userid','Tried to fetch user_id, but was not assigned in session');
+        if (is_null($this->session->userdata('user_id'))) {
+            $this->log('error', 'klsecurity/get_auth_userid', 'Tried to fetch user_id, but was not assigned in session');
             $this->redirect_destroy_session();
-        }
-        else
+        } else {
             return intval($this->session->userdata('user_id'));
+        }
     }
 
     /* User Authorization Functions */
@@ -189,13 +183,13 @@ class Klsecurity extends CI_Model
     public function authorized_for_level($level = -1)
     {
         // Minimum auth level is the Guest one
-        if ($level == -1)
+        if ($level == -1) {
             $level = $this->auth_disabled_level();
+        }
 
         // If this function returns NULL, then this user has no auth level,
         // So we assign it the lowest possible
-        if (is_null($this->session->userdata('user_auth')))
-        {
+        if (is_null($this->session->userdata('user_auth'))) {
             $user_access_level = $this->auth_disabled_level();
 
             // If the user tries to access one level which is > $this->auth_disabled_level()
@@ -204,12 +198,11 @@ class Klsecurity extends CI_Model
             // So we redirect him, without logging
             // This feature is temporarily disabled
             // $this->redirect_destroy_session();
-        }
-        else
+        } else {
             $user_access_level = $this->session->userdata('user_auth');
+        }
         // If the user access level is LOWER than the level we're asking, reject!
-        if ( $user_access_level < $level)
-        {
+        if ($user_access_level < $level) {
             // TODO: here we should add controller name as well
             $this->log('alert', 'klsecurity', 'User with lvl '.$user_access_level.' tried to access unauthorized level '. $level);
             $this->redirect_destroy_session();
@@ -221,14 +214,14 @@ class Klsecurity extends CI_Model
     public function link_visible_for_user($link_path  = '')
     {
         $curr_user_acces_level = $this->current_auth_lvl();
-        if (array_key_exists($link_path, $this->controller_perms))
-        {
+        if (array_key_exists($link_path, $this->controller_perms)) {
             // This link exists in our list of controllers
             // Let's check if the current user has privilege to view it!
-            if ($curr_user_acces_level >= $this->controller_perms[$link_path])
+            if ($curr_user_acces_level >= $this->controller_perms[$link_path]) {
                 return true;
-            else
+            } else {
                 return false;
+            }
         }
         // else return false
         return false;
@@ -261,8 +254,7 @@ class Klsecurity extends CI_Model
     // Function determining if this is an API request
     public function api_request()
     {
-        if (is_null($this->session->userdata('api_request')))
-        {
+        if (is_null($this->session->userdata('api_request'))) {
             return false;
         }
         // Else return this variable's value
@@ -301,13 +293,14 @@ class Klsecurity extends CI_Model
     public function current_auth_lvl()
     {
         // IF the user_auth session data doesn't exist, return disabled user
-        if (!$this->user_is_authenticated())
+        if (!$this->user_is_authenticated()) {
             return $this->auth_disabled_level();
+        }
         return intval($this->session->userdata('user_auth'));
     }
     public function user_is_authenticated()
     {
-        return $this->session->userdata('user_auth') !== NULL;
+        return $this->session->userdata('user_auth') !== null;
     }
     // Returns TRUE if this user is registered
     public function user_is_registered()
@@ -330,42 +323,39 @@ class Klsecurity extends CI_Model
         return $this->current_auth_lvl() >= $this->auth_admin_level();
     }
     /* End Authorization Functions */
-    
+
     /* Password Functions */
     public function generate_password($length = 16, $level = 3)
     {
         list($usec, $sec) = explode(' ', microtime());
         srand((float) $sec + ((float) $usec * 100000));
 
-	$valid_chars[1] = "123456789abcdfghjkmnpqrstvwxyz";
+        $valid_chars[1] = "123456789abcdfghjkmnpqrstvwxyz";
         $valid_chars[2] = "123456789abcdfghjkmnpqrstvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
         $valid_chars[3] = "123456789_!@#$%&*()-=+/abcdfghjkmnpqrstvwxyzABCDEFGHJKLMNPQRSTUVWXYZ_!@#$%&*()-=+/";
 
         $password  = "";
         $count     = 0;
 
-        while ($count < $length)
-        {
-            $found_char = substr($valid_chars[$level], rand(0, strlen($valid_chars[$level])-1), 1);
+        while ($count < $length) {
+            $found_char = substr($valid_chars[$level], rand(0, strlen($valid_chars[$level]) - 1), 1);
             // All character must be different
-            if (!strstr($password, $found_char))
-            {
+            if (!strstr($password, $found_char)) {
                 $password .= $found_char;
-                ++ $count;
+                ++$count;
             }
         }
         return $password;
     }
-    // This function receives a plaintext password and generates the 
-    // BCRYPT hash for it. 
+    // This function receives a plaintext password and generates the
+    // BCRYPT hash for it.
     // It returns string OR FALSE!
-    public function generate_hash ($pass = '')
+    public function generate_hash($pass = '')
     {
-        // I don't really trust the PASSWORD_DEFAULT constant in PHP. 
+        // I don't really trust the PASSWORD_DEFAULT constant in PHP.
         // As such, we stick to PASSWORD_BCRYPT
         $new_password = password_hash($pass, PASSWORD_BCRYPT);
-        if ($new_password === FALSE)
-        {
+        if ($new_password === false) {
             $this->log('alert', 'klsecurity', '1st attempt failed to generate hash for password '. $pass);
             // Weird, we failed to generate the pass,
             // Trying again
@@ -374,7 +364,7 @@ class Klsecurity extends CI_Model
         return $new_password;
     }
     // Returns TRUE of FALSE if the password matches the hash
-    public function compare_hash ($input, $hash)
+    public function compare_hash($input, $hash)
     {
         return password_verify($input, $hash);
     }
@@ -391,39 +381,38 @@ class Klsecurity extends CI_Model
     //     return $returned_filtered_string;
     // }
 
-    public function log ($type = 'info', $module = 'undefined', $message = '', $user_id = -1)
+    public function log($type = 'info', $module = 'undefined', $message = '', $user_id = -1)
     {
-        /* Log type 
+        /* Log type
         - info - for information, statistics, successful logins and changes, etc.
         - alert - for failed logins, failed data
         - warning - for errors or actions that users should not be allowed to do
         - error - for important errors which can affect the stability of the app
         */
 
-        // If the user ID is not set by the calling function we get it from the user data. 
+        // If the user ID is not set by the calling function we get it from the user data.
         // If the user data is not set in session as well the user id is set to -1
-        if ($user_id == -1 && !is_null($this->session->userdata('user_id')))
+        if ($user_id == -1 && !is_null($this->session->userdata('user_id'))) {
             $user_id = $this->session->userdata('user_id');
+        }
         // If we are at an API endpoint, maybe we can find the user_id from the session
-        if ($this->session->userdata('api_request') === TRUE && !is_null($this->session->userdata('api_user_id')))
-        {
+        if ($this->session->userdata('api_request') === true && !is_null($this->session->userdata('api_user_id'))) {
             $user_id = $this->session->userdata('api_user_id');
             // We append the message with API
             $message = "[API] ".$message;
         }
-            
+
         $data['type']       = $type;
         $data['module']     = $module;
         $data['data']       = $message;
-        if (is_cli())
-        {
+        if (is_cli()) {
             $data['ip']     = 0;
             $data['data']   = "[CLI] ".$data['data'];
-        }
-        else
+        } else {
             $data['ip']         = ip2long($this->input->ip_address());
+        }
         $data['user_id']    = $user_id;
-        
+
         // Check if we are in sinkhole mode
         $ci_logs = 'ci_logs';
 
