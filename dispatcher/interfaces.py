@@ -57,7 +57,7 @@ class mysql():
         self.db.execute("BEGIN")
         # Let's see if the current job has been assigned meanwhile
         # We use SELECT FOR UPDATE to lock the entire row!
-        q = self.db.query  ("SELECT id, status, rules \
+        q = self.db.query("SELECT id, status, rules \
                             FROM jobs \
                             WHERE `id` = %s FOR UPDATE", job_id)
         # There will be one answer or 0 for sure, due to index on id
@@ -72,7 +72,7 @@ class mysql():
             else:
                 # Job is available! Let's fetch it!
                 # Marking the job as assigned
-                self.db.execute ("UPDATE jobs \
+                self.db.execute("UPDATE jobs \
                                 SET `status` = 'assigned', `agent_id` = %s \
                                 WHERE `id` = %s", agent_id, job_id)
                 answer['status'] = "accepted"
@@ -90,7 +90,7 @@ class mysql():
     def job_get_details(self, job_id):
         assert (isinstance(job_id, int))
 
-        q = self.db.query  ("SELECT description, rules \
+        q = self.db.query("SELECT description, rules \
                             FROM jobs \
                             WHERE `id` = %s LIMIT 1", job_id)
         if len(q) == 1:
@@ -117,7 +117,7 @@ class mysql():
         self.db.execute("BEGIN")
         # Let's see if the current job has been assigned meanwhile
         # We use SELECT FOR UPDATE to lock the entire row!
-        q = self.db.query  ("SELECT * \
+        q = self.db.query("SELECT * \
                             FROM jobs \
                             WHERE `id` = %s FOR UPDATE", job_id)
 

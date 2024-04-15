@@ -75,7 +75,8 @@ def yara_scan(scan_options):
 
     # Make sure the yara binary is executable
     if not os.path.isfile(config.yara_path):
-        results['yara_errors'] = "Yara binary missing from %s".format(config.yara_path)
+        results['yara_errors'] = "Yara binary missing from %s".format(
+            config.yara_path)
         # Close the files!
         null_file.close()
         # Deleting temp files
