@@ -7,6 +7,7 @@ import config
 
 
 class mysql:
+    """ """
 
     def __init__(self, torndb):
         # This is how we infer the connection
@@ -15,6 +16,11 @@ class mysql:
     # Returns the location of the agent or None of query failed
     # Main Handler will write a log of this
     def authorize_agent(self, auth):
+        """
+
+        :param auth: 
+
+        """
         # or the query returnes more than 1 row
         q = self.db.query("SELECT id " + "FROM agents " + "WHERE auth = %s", auth)
         # If we didn't get exactly 1 answer, there is a problem
@@ -29,6 +35,7 @@ class mysql:
     # For all available jobs return their {id:x, 'fileset_scan'}
     # in a json list
     def fetch_available_jobs(self):
+        """ """
         q = self.db.query(
             "SELECT id, description " + "FROM jobs " + "WHERE `status` = 'new'"
         )
@@ -52,6 +59,12 @@ class mysql:
     # Assigns the job id to the agent id.
     # Returns as status 'assigned' or 'rejected'
     def assign_new_job(self, agent_id, job_id):
+        """
+
+        :param agent_id: 
+        :param job_id: 
+
+        """
 
         # One final check + lock the row
         # Start transaction
@@ -96,6 +109,11 @@ class mysql:
     # (notify_email, rules)
     # for a specific job
     def job_get_details(self, job_id):
+        """
+
+        :param job_id: 
+
+        """
         assert isinstance(job_id, int)
 
         q = self.db.query(
@@ -120,6 +138,13 @@ class mysql:
     # Function used to INSERT into db the list of results it receives
     ###### TODO: how do I make sure this insert was successful? ########
     def save_agent_results(self, agent_id, results, job_status):
+        """
+
+        :param agent_id: 
+        :param results: 
+        :param job_status: 
+
+        """
         validators.validate_agent_results(results)
         agent_id = str(int(agent_id))
         job_id = str(int(results["job_id"]))
@@ -195,9 +220,15 @@ class mysql:
 
 
 class notification:
+    """ """
     # def __init__(self):
 
     def email(self, data):
+        """
+
+        :param data: 
+
+        """
         assert isinstance(data, dict)
 
         mail = MIMEText(data["body"])
@@ -219,9 +250,15 @@ class notification:
 
 
 class validators:
+    """ """
 
     @classmethod
     def validate_agent_results(cls, entry):
+        """
+
+        :param entry: 
+
+        """
         assert isinstance(entry, dict)
         assert "job_id" in entry
         assert "finish_time" in entry

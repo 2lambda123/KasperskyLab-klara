@@ -13,6 +13,11 @@ import config
 
 
 def yara_scan(scan_options):
+    """
+
+    :param scan_options: 
+
+    """
     assert isinstance(scan_options, dict)
     assert isinstance(config.head_path_and_args, list)
 
@@ -149,6 +154,11 @@ def yara_scan(scan_options):
 
 
 def extract_matched_files(yara_results):
+    """
+
+    :param yara_results: 
+
+    """
     if len(yara_results) == 0:
         return []
 
@@ -164,6 +174,11 @@ def extract_matched_files(yara_results):
 
 
 def generate_md5_from_results(yara_matched_files):
+    """
+
+    :param yara_matched_files: 
+
+    """
     assert isinstance(yara_matched_files, list)
 
     if len(yara_matched_files) == 0:
