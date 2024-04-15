@@ -10,6 +10,7 @@ import requests
 
 
 def fetch_available_jobs():
+    """ """
     # logging.info ("Called fetch_new_job")
     # Set up the request
     payload = {"auth": config.api_key}
@@ -32,6 +33,11 @@ def fetch_available_jobs():
 
 
 def request_assign_job(job_id=-1):
+    """
+
+    :param job_id:  (Default value = -1)
+
+    """
     # Set up the request
     payload = {"auth": config.api_key, "job_id": job_id}
     # Make the request, with the auth as POST DATA
@@ -51,6 +57,11 @@ def request_assign_job(job_id=-1):
 
 
 def push_results(results):
+    """
+
+    :param results: 
+
+    """
     # logging.info ("Called push_results")
     # Set up the request
     # In order to set the 2 POST params, we use a dictionary,
